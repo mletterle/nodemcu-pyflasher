@@ -75,6 +75,27 @@ class ESP8266ChipInfo(ChipInfo):
         })
         return data
 
+class ESP32S2ChipInfo(ChipInfo):
+    def __init__(self, model, mac, num_cores, cpu_frequency, has_bluetooth, has_embedded_flash,
+                 has_factory_calibrated_adc):
+        super(ESP32S2ChipInfo, self).__init__("ESP32S2", model, mac)
+        self.num_cores = num_cores
+        self.cpu_frequency = cpu_frequency
+        self.has_bluetooth = has_bluetooth
+        self.has_embedded_flash = has_embedded_flash
+        self.has_factory_calibrated_adc = has_factory_calibrated_adc
+
+    def as_dict(self):
+        data = ChipInfo.as_dict(self)
+        data.update({
+            'num_cores': self.num_cores,
+            'cpu_frequency': self.cpu_frequency,
+            'has_bluetooth': self.has_bluetooth,
+            'has_embedded_flash': self.has_embedded_flash,
+            'has_factory_calibrated_adc': self.has_factory_calibrated_adc,
+        })
+        return data
+
 
 def read_chip_property(func, *args, **kwargs):
     try:
@@ -85,6 +106,16 @@ def read_chip_property(func, *args, **kwargs):
 
 def read_chip_info(chip):
     mac = ':'.join('{:02X}'.format(x) for x in read_chip_property(chip.read_mac))
+    if isinstance(chip, esptool.ESP32S2ROM):
+        model = read_chip_property(chip.get_chip_description)
+        features = read_chip_property(chip.get_chip_features)
+        num_cores = 2 if 'Dual Core' in features else 1
+        frequency = next((x for x in ('160MHz', '240MHz') if x in features), '80MHz')
+        has_bluetooth = 'BT' in features
+        has_embedded_flash = 'Embedded Flash' in features
+        has_factory_calibrated_adc = 'VRef calibration in efuse' in features
+        return ESP32S2ChipInfo(model, mac, num_cores, frequency, has_bluetooth,
+                             has_embedded_flash, has_factory_calibrated_adc)
     if isinstance(chip, esptool.ESP32ROM):
         model = read_chip_property(chip.get_chip_description)
         features = read_chip_property(chip.get_chip_features)

@@ -9,7 +9,7 @@ import esptool
 import serial
 
 from esphomeflasher import const
-from esphomeflasher.common import ESP32ChipInfo, EsphomeflasherError, chip_run_stub, \
+from esphomeflasher.common import ESP32S2ChipInfo, ESP32ChipInfo, EsphomeflasherError, chip_run_stub, \
     configure_write_flash_args, detect_chip, detect_flash_size, read_chip_info
 from esphomeflasher.const import ESP32_DEFAULT_BOOTLOADER_FORMAT, ESP32_DEFAULT_OTA_DATA, \
     ESP32_DEFAULT_PARTITIONS
@@ -99,7 +99,7 @@ def run_esphomeflasher(argv):
     print("Chip Info:")
     print(" - Chip Family: {}".format(info.family))
     print(" - Chip Model: {}".format(info.model))
-    if isinstance(info, ESP32ChipInfo):
+    if isinstance(info, ESP32ChipInfo) or isinstance(info, ESP32S2ChipInfo):
         print(" - Number of Cores: {}".format(info.num_cores))
         print(" - Max CPU Frequency: {}".format(info.cpu_frequency))
         print(" - Has Bluetooth: {}".format('YES' if info.has_bluetooth else 'NO'))
