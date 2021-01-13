@@ -40,6 +40,9 @@ class RedirectText:
         self._background = None
         self._secret = False
 
+    def isatty(self):
+        return False
+
     def _add_content(self, value):
         attr = wx.TextAttr()
         if self._bold:
